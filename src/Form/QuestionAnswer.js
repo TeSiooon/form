@@ -1,66 +1,38 @@
 import { useState } from "react";
+import { QUIZ_ACTION } from "./QuizForm";
 import styles from "./QuizForm.module.css";
+import { v4 as uuid } from "uuid";
 
-function QuestionAnswer() {
-  const [inputFields, setIntupFields] = useState([
-    {
-      title: "",
-      isCorrect: "",
-    },
-  ]);
-
+function QuestionAnswer({ updateQuizState, answerIndex, questionIndex }) {
   const [checked, setChecked] = useState(false);
   const handleChange = () => {
     setChecked(!checked);
   };
-  const handleFormChange = (index, e) => {
-    let data = [...inputFields];
-    data[index][e.target.name] = e.target.value;
-    setIntupFields(data);
-  };
 
-  const addAnswerField = (e) => {
-    e.preventDefault();
-    let newAnswer = {
-      title: "",
-      isCorrect: "",
-    };
-    setIntupFields([...inputFields, newAnswer]);
+  const removeAnswer = () => {
+    updateQuizState({
+      type: QUIZ_ACTION.removeAnswer,
+      payload: {
+        questionIndex: questionIndex,
+        answer: {
+          answerIndex: answerIndex,
+        },
+      },
+    });
   };
-  const removeAnswerField = (index, e) => {
-    let data = [...inputFields];
-    data.splice(index, 1);
-    setIntupFields(data);
-    // console.log(index + "index usuwanego");
-  };
-
-  console.log(inputFields);
-
+  // console.log(checked);
   return (
     <div className={styles.answers}>
-      {inputFields.map((input, index) => {
-        return (
-          <div key={index}>
-            <input
-              name="title"
-              placeholder="Wpisz tytul quizu"
-              value={input.name}
-              onChange={(e) => handleFormChange(index, e)}
-            ></input>
-            <input
-              type="checkbox"
-              name="isCorrect"
-              onChange={((e) => handleFormChange(index, e), handleChange)}
-              value={input.isCorrect}
-              //checked={checked}
-            ></input>
-            <button onClick={() => removeAnswerField(index)}>
-              Usun to pytanie
-            </button>
-          </div>
-        );
-      })}
-      <button onClick={addAnswerField}>Dodaj wiecej odpowiedzi</button>
+      <div>
+        <input name="title" placeholder="Podaj odpowiedz"></input>
+        <input
+          type="checkbox"
+          value={checked}
+          onClick={handleChange}
+          name="isCorrect"
+        ></input>
+      </div>
+      <button onClick={removeAnswer}>Usun to pytanie</button>
     </div>
   );
 }

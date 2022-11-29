@@ -1,50 +1,53 @@
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef } from "react";
+import QuestionAnswer from "./QuestionAnswer";
 import { QUIZ_ACTION } from "./QuizForm";
+import styles from "./QuizForm.module.css";
+import { v4 as uuid } from "uuid";
 
 function QuizQuestion({ questionIndex, updateQuizState, question }) {
-  const [inputValue, setInputValue] = useState("");
-
-  const updateState = useCallback(() => {
-    updateQuizState({
-      type: QUIZ_ACTION.setQuestionTitle,
-      payload: {
-        questionIndex: questionIndex,
-        title: inputValue,
-      },
-    });
-  }, [inputValue, questionIndex, updateQuizState]);
-
-  useEffect(() => {
-    const id = setTimeout(updateState, 300);
-
-    console.log("Useefect");
-
-    return () => {
-      console.log("Cleeeeen");
-      clearTimeout(id);
-    };
-  }, [inputValue, updateState]);
-
   const inputQuestion = useRef(null);
 
+  const addAnswer = () => {
+    updateQuizState({
+      type: QUIZ_ACTION.addAnswer,
+      payload: {
+        questionIndex: questionIndex,
+        answer: {
+          id: uuid(),
+          title: "",
+          isCorrect: false,
+        },
+      },
+    });
+  };
+
   return (
-    <div>
+    <div className={styles.question}>
       <input
         ref={inputQuestion}
-        onChange={() => setInputValue(inputQuestion.current.value)}
-        // onInput={() =>
-        //   updateQuizState({
-        //     type: QUIZ_ACTION.setQuestionTitle,
-        //     payload: {
-        //       questionIndex: questionIndex,
-        //       title: inputQuestion.current.value,
-        //     },
-        //   })
-        // }
-        value={inputValue}
+        onChange={() =>
+          updateQuizState({
+            type: QUIZ_ACTION.setQuestionTitle,
+            payload: {
+              questionIndex: questionIndex,
+              title: inputQuestion.current.value,
+            },
+          })
+        }
+        value={question.title}
         name="title"
         placeholder="Wpisz pytanie"
       />
+      {question.answers.map((answer, index) => (
+        <QuestionAnswer
+          key={answer.id}
+          answerIndex={index}
+          updateQuizState={updateQuizState}
+          questionIndex={questionIndex}
+        />
+      ))}
+
+      <button onClick={addAnswer}>Dodaj odpowiedz</button>
     </div>
   );
 }

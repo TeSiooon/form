@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { QUIZ_ACTION } from "./QuizForm";
 
-function QuizTitle({ updateQuizState }) {
+function QuizTitle({ updateQuizState, state }) {
   const inputTitle = useRef(null);
   const inputDescription = useRef(null);
 
@@ -17,6 +17,7 @@ function QuizTitle({ updateQuizState }) {
         }
         name="title"
         placeholder="Wpisz tytul quizu"
+        value={state.name}
       />
       <input
         ref={inputDescription}
@@ -28,6 +29,7 @@ function QuizTitle({ updateQuizState }) {
         }
         name="description"
         placeholder="Podaj opis quizu"
+        value={state.description}
       />
     </div>
   );

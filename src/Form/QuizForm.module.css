@@ -3,3 +3,8 @@
   border: 1px solid black;
   margin-top: 1rem;
 }
+
+.question {
+  background-color: red;
+  margin-top: 2rem;
+}

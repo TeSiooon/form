@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { useEffect, useReducer } from "react";
 import QuestionAnswer from "./QuestionAnswer";
 import QuizQuestion from "./QuizQuestion";
 import QuizTitle from "./QuizTitle";
@@ -10,6 +10,9 @@ export const QUIZ_ACTION = {
   setCategoryId: "SET_CATEGORY_ID",
   addQuestion: "ADD_QUESTION",
   setQuestionTitle: "SET_QUESTION_TITLE",
+  setState: "SET_STATE",
+  addAnswer: "ADD_ANSWER",
+  removeAnswer: "REMOVE_ANSWER",
 };
 
 const initialState = {
@@ -30,32 +33,72 @@ function reducer(state, action) {
     case QUIZ_ACTION.addQuestion:
       return {
         ...state,
-        questions: [...state.questions, { ...action.payload }],
+        questions: [...state.questions, action.payload],
       };
     case QUIZ_ACTION.setQuestionTitle: {
       const newState = { ...state };
       newState.questions[action.payload.questionIndex].title =
         action.payload.title;
-      console.log(newState);
       return newState;
     }
+    case QUIZ_ACTION.addAnswer: {
+      const newState = { ...state };
+      newState.questions[action.payload.questionIndex].answers.push(
+        action.payload.answer
+      );
+      // console.log("asdsdaasdasd");
+      // console.log(state);
+      // console.log(newState);
+      return newState;
+    }
+    case QUIZ_ACTION.removeAnswer: {
+      const newState = { ...state };
+      newState.questions[action.payload.questionIndex].answers.splice(
+        action.payload.answer.answerIndex,
+        1
+      );
+      console.log(newState.questions[action.payload.questionIndex].answers);
+      return newState;
+    }
+    case QUIZ_ACTION.setState:
+      return action.payload;
     default:
       return state;
   }
 }
 
 function QuizForm() {
-  const [quizState, setQuizState] = useReducer(reducer, initialState);
-  console.log(quizState);
+  const loadedState = JSON.parse(localStorage.getItem("quizState"));
+
+  const [quizState, setQuizState] = useReducer(
+    reducer,
+    loadedState ? loadedState : initialState
+  );
+
+  // useEffect(() => {
+  //   const loadedState = JSON.parse(localStorage.getItem("quizState"));
+  //   console.log(loadedState);
+  //   if (loadedState) {
+  //     setQuizState({
+  //       type: QUIZ_ACTION.setState,
+  //       payload: loadedState,
+  //     });
+  //   }
+  // }, []);
+
+  useEffect(() => {
+    localStorage.setItem("quizState", JSON.stringify(quizState));
+  }, [quizState]);
+
   const submit = (e) => {
     e.preventDefault();
   };
-
   //Dodanie pytania
   const addQuestion = () => {
     setQuizState({
       type: QUIZ_ACTION.addQuestion,
       payload: {
+        id: uuid(),
         title: "",
         answers: [],
       },
@@ -65,11 +108,11 @@ function QuizForm() {
   return (
     <div>
       <form onSubmit={submit}>
-        <QuizTitle updateQuizState={setQuizState} />
+        <QuizTitle updateQuizState={setQuizState} state={quizState} />
         {quizState.questions.map((question, index) => (
           <QuizQuestion
-            question={quizState}
-            key={uuid()}
+            question={question}
+            key={question.id}
             questionIndex={index}
             updateQuizState={setQuizState}
           />
